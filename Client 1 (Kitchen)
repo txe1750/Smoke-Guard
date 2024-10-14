@@ -38,12 +38,12 @@ void loop() {
   Serial.println(val);
 
   if (val == 0) {
-     client.print("d2\r");
+     client.print("d1\r");
      Serial.println("Message sent: danger");
      tone(buzzer_1, 600);
      tone(buzzer_2, 600);
    } else {
-     client.print("s2\r");
+     client.print("s1\r");
      Serial.println("Message sent: safe");
      noTone(buzzer_1);
      noTone(buzzer_2);
