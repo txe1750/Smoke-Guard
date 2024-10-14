@@ -1,0 +1,93 @@
+#include <TridentTD_LineNotify.h>
+#include <ESP8266WiFi.h>
+
+const char* ap_ssid = "SmokeDetecter";
+const char* ap_password = "87654321";
+
+#ifndef STASSID
+#define STASSID "forwork"
+#define STAPSK "123456987"
+#endif
+
+const char* ssid = STASSID;
+const char* password = STAPSK;
+
+WiFiServer server(80);
+
+const int Buzzer = D1;
+
+void setup() {
+  Serial.begin(115200);
+
+  // ตั้งให้ ESP อยู่ในโหมด STA
+  WiFi.mode(WIFI_AP_STA);
+
+  // เริ่มโหมด STA (โหมดไคลเอนต์) เพื่อเชื่อมต่อกับเราเตอร์
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  int max_retries = 100;  
+  int retries = 0;
+
+  while (WiFi.status() != WL_CONNECTED && retries < max_retries) {
+    delay(500);
+    Serial.print(".");
+    retries++;
+  }
+
+  if (WiFi.status() == WL_CONNECTED) {
+    Serial.println();
+    Serial.println("Connected to WiFi network.");
+    Serial.print("IP Address (STA): ");
+    Serial.println(WiFi.localIP());
+  } else {
+    Serial.println();
+    Serial.println("Failed to connect to WiFi.");
+  }
+
+  // ตั้งค่า ESP8266 เป็น Access Point
+  WiFi.softAP(ap_ssid, ap_password);
+
+  // แสดงที่อยู่ IP ของโหมด AP
+  Serial.print("Access Point IP: ");
+  Serial.println(WiFi.softAPIP());
+
+  // เริ่มต้นเซิร์ฟเวอร์
+  server.begin();
+  Serial.println("Server started");
+
+  pinMode(Buzzer, OUTPUT);
+
+  LINE.setToken("a1pCGdXT9vpGKeTOR6x1xzHHyzXtdg5VQxRGFKlf09a");
+}
+
+void loop() {
+  // ตรวจสอบการเชื่อมต่อของไคลเอนต์
+  WiFiClient client = server.available();
+  if (client) {
+    Serial.println("Client connected");
+    
+    String message = client.readStringUntil('\r');
+    Serial.print("Received: ");
+    Serial.println(message);
+
+    client.println("Message received");
+
+    if (message == "d1") {
+      LINE.notifyPicture("Danger! Smoke detected from Kitchen!" , "https://www.meme-arsenal.com/memes/69d7fade97648a273e534128bce69957.jpg");
+      tone(Buzzer, 500);delay(100);
+    } 
+    if (message == "s1") {
+      noTone(Buzzer);
+    }
+    
+    if (message == "d2") {
+      LINE.notifyPicture("Danger! Smoke detected from Bedroom!" ,"https://petmaya.com/wp-content/uploads/2021/05/Disaster-Girl-04.jpg");
+      tone(Buzzer, 500);delay(100);
+    }
+    if (message == "s2") {
+      noTone(Buzzer);
+    }
+  }
+}
