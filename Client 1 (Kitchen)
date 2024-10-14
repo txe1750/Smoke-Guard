@@ -1,0 +1,52 @@
+#include <ESP8266WiFi.h>
+
+const char* ssid = "SmokeDetecter";
+const char* password = "87654321";
+
+const char* host = "192.168.4.1";  // IP ของ AP
+const uint16_t port = 80;          // พอร์ตที่ใช้
+
+const int buzzer_1 = D5;
+const int buzzer_2 = D6;
+const int detector = D7;
+int val;
+
+void setup() {
+  Serial.begin(115200);
+  pinMode(buzzer_1, OUTPUT);
+  pinMode(buzzer_2, OUTPUT);
+  pinMode(detector, INPUT);
+
+  // เชื่อม Wi-Fi
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) { // 15 วินาทีในการเชื่อมต่อ
+    delay(500);
+    Serial.print(".");
+  }
+}
+
+void loop() {
+  WiFiClient client;
+  if (!client.connect(host, port)) {
+    //Serial.println("Connection failed");
+    delay(5000);  // หน่วงเวลา 5 วินาทีและลองเชื่อมต่อใหม่
+    return;
+  }
+
+  val = digitalRead(detector);
+  Serial.println(val);
+
+  if (val == 0) {
+     client.print("d2\r");
+     Serial.println("Message sent: danger");
+     tone(buzzer_1, 600);
+     tone(buzzer_2, 600);
+   } else {
+     client.print("s2\r");
+     Serial.println("Message sent: safe");
+     noTone(buzzer_1);
+     noTone(buzzer_2);
+   }
+   
+  delay(1000);   
