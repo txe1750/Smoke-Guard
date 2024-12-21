@@ -59,7 +59,7 @@ void setup() {
 
   pinMode(Buzzer, OUTPUT);
 
-  LINE.setToken("a1pCGdXT9vpGKeTOR6x1xzHHyzXtdg5VQxRGFKlf09a");
+  LINE.setToken("sL8n9532anji5avq4mRnmNX2HxB2NzMpsKbtXB45NEN");
 }
 
 void loop() {
